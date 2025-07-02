@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class OrderItemDetailDto {
     private String productName;
     private String productCategory;
+    private String productImageUrl;
     private String size;
     private Double basePrice;
     private Double subtotal;

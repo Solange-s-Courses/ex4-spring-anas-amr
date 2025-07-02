@@ -194,6 +194,7 @@ public class OrderService {
         return new OrderItemDetailDto(
                 item.getProduct().getName(),
                 item.getProduct().getCategory().getName(),
+                item.getProduct().getImageUrl(),
                 item.getSize().name(),
                 item.getBasePrice(),
                 item.getSubtotal(),
