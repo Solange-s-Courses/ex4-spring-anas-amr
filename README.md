@@ -399,8 +399,8 @@ mvn spring-boot:run
 ### Admin Account
 
 - **Username**: admin
-- **Email**: admin@pizza.com
-- **Password**: admin123
+- **Email**: admin@pizzaapp.com
+- **Password**: ptpt-admin
 
 ## 📱 Application Screenshots
 
