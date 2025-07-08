@@ -15,7 +15,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <description>Spring Boot MVC Project</description>
     <properties>
-        <java.version>23</java.version>
+        <java.version>17</java.version>
     </properties>
     <repositories>
         <repository>
