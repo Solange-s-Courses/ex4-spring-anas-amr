@@ -18,4 +18,6 @@ public class OrderSummaryDto {
     private Double totalPrice;
     private int itemCount;
     private String deliveryAddress;
+    private String customerName;
+    private String customerEmail;
 }
