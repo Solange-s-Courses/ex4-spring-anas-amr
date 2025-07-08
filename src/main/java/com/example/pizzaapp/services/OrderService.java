@@ -79,14 +79,25 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItemDto cartItem : cartItems) {
+            // Validate product exists
             Product product = productRepository.findById(cartItem.getProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid product ID: " + cartItem.getProductId()));
+                    .orElseThrow(() -> new IllegalArgumentException(
+                        String.format("Product with ID '%s' not found. The product may have been removed.", 
+                                    cartItem.getProductId())));
 
+            // Validate product option (size) exists
             ProductOption productOption = productOptionRepository
                     .findByProductIdAndSize(product.getId(), cartItem.getSize())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid size for product: " + cartItem.getSize()));
+                    .orElseThrow(() -> new IllegalArgumentException(
+                        String.format("Size '%s' is not available for product '%s'", 
+                                    cartItem.getSize(), product.getName())));
 
+            // Validate toppings exist
             List<Topping> toppings = toppingRepository.findAllById(cartItem.getToppingIds());
+            if (toppings.size() != cartItem.getToppingIds().size()) {
+                throw new IllegalArgumentException(
+                    String.format("Some toppings for product '%s' are no longer available", product.getName()));
+            }
 
             double basePrice = productOption.getPrice();
             double toppingsPrice = toppings.stream().mapToDouble(Topping::getPrice).sum();

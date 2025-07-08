@@ -21,6 +21,17 @@
                 style="gap: 8px;">
                 <i class="fas fa-receipt"></i>My Orders
             </a></li>
+
+        <!-- Admin Dashboard Link - Only show for admin users -->
+        <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+            <a class="dropdown-item d-flex align-items-center"
+                href="/admin/dashboard"
+                style="gap: 8px;">
+                <i class="fas fa-tachometer-alt text-primary"></i>Admin
+                Dashboard
+            </a>
+        </li>
+
         <li><hr class="dropdown-divider" /></li>
         <li>
             <form th:action="@{/logout}" method="post" class="d-inline">
