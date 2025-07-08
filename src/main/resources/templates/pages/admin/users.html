@@ -32,6 +32,7 @@
                         <tr>
                             <th>Username</th>
                             <th>Role</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -49,16 +50,38 @@
                                     class="text-muted">No roles</span>
                             </td>
                             <td>
+                                <span th:if="${user.enabled}"
+                                    class="badge bg-success">Active</span>
+                                <span th:unless="${user.enabled}"
+                                    class="badge bg-danger">Blocked</span>
+                            </td>
+                            <td>
                                 <th:block
                                     th:with="isAdmin=${#lists.contains(user.roles.![name.name()], 'ROLE_ADMIN')}">
                                     <a class="btn btn-primary btn-sm mb-1"
                                         th:unless="${isAdmin}"
                                         th:href="@{/admin/users/{id}/orders(id=${user.id})}">View
                                         Orders</a>
-                                    <a class="btn btn-warning btn-sm mb-1"
+                                    <button class="btn btn-warning btn-sm mb-1"
                                         th:unless="${isAdmin}"
-                                        th:href="@{/admin/users/{id}/changePassword(id=${user.id})}">Change
-                                        Password</a>
+                                        type="button"
+                                        th:data-user-id="${user.id}"
+                                        th:data-username="${user.username}"
+                                        onclick="showChangePasswordModal(this)">Change
+                                        Password</button>
+                                    <form th:unless="${isAdmin}"
+                                        style="display: inline-block;"
+                                        th:action="@{/admin/users/{id}/block(id=${user.id})}"
+                                        method="post"
+                                        class="block-user-form">
+                                        <button type="button"
+                                            th:class="${user.enabled} ? 'btn btn-danger btn-sm mb-1 block-btn' : 'btn btn-success btn-sm mb-1 block-btn'"
+                                            th:text="${user.enabled} ? 'Block User' : 'Unblock User'"
+                                            th:data-username="${user.username}"
+                                            th:data-action="${user.enabled} ? 'block' : 'unblock'"
+                                            onclick="showBlockConfirmModal(this)">
+                                        </button>
+                                    </form>
                                     <span th:if="${isAdmin}"
                                         class="text-muted">Admin User</span>
                                 </th:block>
@@ -67,14 +90,22 @@
                     </tbody>
                 </table>
             </div>
-            <div class="d-flex justify-content-center">
+            <div class="d-flex justify-content-center gap-3">
                 <button class="btn btn-secondary mt-3"
                     onclick="window.location.href='/admin/dashboard'">Back to
                     Dashboard</button>
+                <form th:action="@{/admin/users/unblockAll}"
+                    method="post" style="display: inline-block;"
+                    class="fix-status-form">
+                    <button type="button" class="btn btn-warning mt-3"
+                        onclick="showFixStatusModal()">
+                        UnBlock All Users
+                    </button>
+                </form>
             </div>
         </div>
 
-        <!-- Toast for Success Message -->
+        <!-- Toast for Success Messages -->
         <div class="toast-container position-fixed bottom-0 end-0 p-3"
             style="z-index: 11">
             <div id="passwordChangeToast"
@@ -89,20 +120,250 @@
                         data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
             </div>
+
+            <div id="userActionToast"
+                class="toast align-items-center toast-orange border-0"
+                role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body" id="userActionMessage">
+                        User action completed successfully.
+                    </div>
+                    <button type="button"
+                        class="btn-close btn-close-white me-2 m-auto"
+                        data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block/Unblock User Confirmation Modal -->
+        <div class="modal fade" id="blockUserModal" tabindex="-1"
+            aria-labelledby="blockUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="blockUserModalLabel">Confirm
+                            Action</h5>
+                        <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="blockModalMessage">Are you sure you want to
+                            perform this action?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger"
+                            id="confirmBlockAction">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fix User Status Confirmation Modal -->
+        <div class="modal fade" id="fixStatusModal" tabindex="-1"
+            aria-labelledby="fixStatusModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="fixStatusModalLabel">Fix
+                            User Status</h5>
+                        <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>This will enable all users that are currently
+                            disabled. This action cannot be undone.</p>
+                        <p><strong>Are you sure you want to
+                                continue?</strong></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-warning"
+                            id="confirmFixStatus">Yes, Enable All Users</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Change Password Modal -->
+        <div class="modal fade" id="changePasswordModal" tabindex="-1"
+            aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"
+                            id="changePasswordModalLabel">Change Password</h5>
+                        <button type="button" class="btn-close"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="changePasswordForm"
+                        th:action="@{/admin/users/changePassword}"
+                        method="post">
+                        <div class="modal-body">
+                            <input type="hidden" id="modalUserId"
+                                name="userId" />
+                            <div class="mb-3">
+                                <label for="modalUserName"
+                                    class="form-label">User:</label>
+                                <input type="text" id="modalUserName"
+                                    class="form-control" readonly />
+                            </div>
+                            <div class="mb-3">
+                                <label for="modalNewPassword"
+                                    class="form-label">New Password:</label>
+                                <input type="password" id="modalNewPassword"
+                                    name="newPassword" class="form-control"
+                                    required minlength="3" />
+                                <div class="form-text">Password must be at least
+                                    3 characters long.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="modalConfirmPassword"
+                                    class="form-label">Confirm New
+                                    Password:</label>
+                                <input type="password" id="modalConfirmPassword"
+                                    name="confirmPassword" class="form-control"
+                                    required />
+                                <div id="passwordMismatch" class="text-danger"
+                                    style="display: none;">Passwords do not
+                                    match.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary"
+                                id="submitPasswordChange">Change
+                                Password</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <script>
+    let currentForm = null;
+
     document.addEventListener('DOMContentLoaded', function() {
-        var successMessage = /*[[${success != null}]]*/ false;
+        // Handle all success messages
+        var successMessage = /*[[${success}]]*/ '';
         if (successMessage) {
-            var toastEl = document.getElementById('passwordChangeToast');
-            var toast = new bootstrap.Toast(toastEl);
-            toast.show();
-            setTimeout(function() {
-                toast.hide();
-            }, 5000);
+            if (successMessage.toLowerCase().includes('password')) {
+                // Show password change toast
+                var toastEl = document.getElementById('passwordChangeToast');
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+                setTimeout(function() {
+                    toast.hide();
+                }, 5000);
+            } else {
+                // Show general user action toast
+                document.getElementById('userActionMessage').textContent = successMessage;
+                var toastEl = document.getElementById('userActionToast');
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+                setTimeout(function() {
+                    toast.hide();
+                }, 5000);
+            }
         }
+
+        // Handle block confirmation modal
+        document.getElementById('confirmBlockAction').addEventListener('click', function() {
+            if (currentForm) {
+                currentForm.submit();
+            }
+            var modal = bootstrap.Modal.getInstance(document.getElementById('blockUserModal'));
+            modal.hide();
+        });
+
+        // Handle fix status confirmation modal
+        document.getElementById('confirmFixStatus').addEventListener('click', function() {
+            document.querySelector('.fix-status-form').submit();
+            var modal = bootstrap.Modal.getInstance(document.getElementById('fixStatusModal'));
+            modal.hide();
+        });
+
+        // Handle password confirmation validation
+        document.getElementById('modalConfirmPassword').addEventListener('input', function() {
+            validatePasswordMatch();
+        });
+
+        document.getElementById('modalNewPassword').addEventListener('input', function() {
+            validatePasswordMatch();
+        });
+
+        // Handle change password form submission
+        document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+            if (!validatePasswordMatch()) {
+                e.preventDefault();
+                return false;
+            }
+            // If validation passes, the form will submit normally and redirect
+        });
     });
+
+    function validatePasswordMatch() {
+        const newPassword = document.getElementById('modalNewPassword').value;
+        const confirmPassword = document.getElementById('modalConfirmPassword').value;
+        const mismatchDiv = document.getElementById('passwordMismatch');
+        const submitButton = document.getElementById('submitPasswordChange');
+
+        if (confirmPassword && newPassword !== confirmPassword) {
+            mismatchDiv.style.display = 'block';
+            submitButton.disabled = true;
+            return false;
+        } else {
+            mismatchDiv.style.display = 'none';
+            submitButton.disabled = false;
+            return true;
+        }
+    }
+
+    function showBlockConfirmModal(button) {
+        const username = button.getAttribute('data-username');
+        const action = button.getAttribute('data-action');
+        const form = button.closest('form');
+        
+        currentForm = form;
+        
+        const message = `Are you sure you want to ${action} user "${username}"?`;
+        document.getElementById('blockModalMessage').textContent = message;
+        
+        const confirmButton = document.getElementById('confirmBlockAction');
+        confirmButton.className = action === 'block' ? 'btn btn-danger' : 'btn btn-success';
+        confirmButton.textContent = action === 'block' ? 'Block User' : 'Unblock User';
+        
+        var modal = new bootstrap.Modal(document.getElementById('blockUserModal'));
+        modal.show();
+    }
+
+    function showFixStatusModal() {
+        var modal = new bootstrap.Modal(document.getElementById('fixStatusModal'));
+        modal.show();
+    }
+
+    function showChangePasswordModal(button) {
+        const userId = button.getAttribute('data-user-id');
+        const username = button.getAttribute('data-username');
+        
+        // Set the user information in the modal
+        document.getElementById('modalUserId').value = userId;
+        document.getElementById('modalUserName').value = username;
+        
+        // Clear the password fields
+        document.getElementById('modalNewPassword').value = '';
+        document.getElementById('modalConfirmPassword').value = '';
+        
+        // Hide password mismatch message and enable submit button
+        document.getElementById('passwordMismatch').style.display = 'none';
+        document.getElementById('submitPasswordChange').disabled = false;
+        
+        var modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+        modal.show();
+    }
 </script>
     </body>
 </html>
