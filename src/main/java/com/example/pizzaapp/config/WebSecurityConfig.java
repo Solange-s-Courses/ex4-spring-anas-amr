@@ -20,9 +20,9 @@ public class WebSecurityConfig {
                 http
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/", "/error", "/cart", "/menu", "/css/**", "/js/**",
-                                                                "/assets/**", "/images/**", "/login", "/register")
+                                                                "/assets/**", "/images/**", "/login", "/register", "/access-denied")
                                                 .permitAll()
-                                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                                .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .formLogin(form -> form
                                                 .loginPage("/login")
@@ -33,6 +33,19 @@ public class WebSecurityConfig {
                                                         var savedRequest = requestCache.getRequest(request, response);
 
                                                         try {
+
+                                                                // Check if user has ADMIN role
+                                                                boolean isAdmin = authentication.getAuthorities()
+                                                                                .stream()
+                                                                                .anyMatch(grantedAuthority -> grantedAuthority
+                                                                                                .getAuthority()
+                                                                                                .equals("ROLE_ADMIN"));
+
+                                                                if (isAdmin) {
+                                                                        response.sendRedirect("/admin/dashboard");
+                                                                        return;
+                                                                }
+
                                                                 if (savedRequest != null) {
                                                                         URI uri = new URI(
                                                                                         savedRequest.getRedirectUrl());
@@ -54,6 +67,8 @@ public class WebSecurityConfig {
                                                 })
                                                 .failureUrl("/login?error")
                                                 .permitAll())
+                                .exceptionHandling(exceptions -> exceptions
+                                                .accessDeniedPage("/access-denied"))
                                 .logout(logout -> logout.permitAll());
 
                 return http.build();
