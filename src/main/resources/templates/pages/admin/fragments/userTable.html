@@ -1,0 +1,63 @@
+<div th:fragment="userTable" class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.username}"></td>
+                <td>
+                    <th:block th:each="role, iterStat : ${user.roles}">
+                        <span th:text="${role.name}"
+                            th:class="${role.name.name() == 'ROLE_ADMIN'} ? 'badge bg-danger me-1' : 'badge bg-primary me-1'">
+                        </span>
+                    </th:block>
+                    <span th:if="${user.roles.empty}" class="text-muted">No
+                        roles</span>
+                </td>
+                <td>
+                    <span th:if="${user.enabled}"
+                        class="badge bg-success">Active</span>
+                    <span th:unless="${user.enabled}"
+                        class="badge bg-danger">Blocked</span>
+                </td>
+                <td>
+                    <th:block
+                        th:with="isAdmin=${#lists.contains(user.roles.![name.name()], 'ROLE_ADMIN')}">
+                        <a class="btn btn-primary btn-sm mb-1"
+                            th:unless="${isAdmin}"
+                            th:href="@{/admin/users/{id}/orders(id=${user.id})}">View
+                            Orders</a>
+                        <button class="btn btn-warning btn-sm mb-1"
+                            th:unless="${isAdmin}"
+                            type="button"
+                            th:data-user-id="${user.id}"
+                            th:data-username="${user.username}"
+                            onclick="showChangePasswordModal(this)">Change
+                            Password</button>
+                        <form th:unless="${isAdmin}"
+                            style="display: inline-block;"
+                            th:action="@{/admin/users/{id}/block(id=${user.id})}"
+                            method="post"
+                            class="block-user-form">
+                            <button type="button"
+                                th:class="${user.enabled} ? 'btn btn-danger btn-sm mb-1 block-btn' : 'btn btn-success btn-sm mb-1 block-btn'"
+                                th:text="${user.enabled} ? 'Block User' : 'Unblock User'"
+                                th:data-username="${user.username}"
+                                th:data-action="${user.enabled} ? 'block' : 'unblock'"
+                                onclick="showBlockConfirmModal(this)">
+                            </button>
+                        </form>
+                        <span th:if="${isAdmin}" class="text-muted">Admin
+                            User</span>
+                    </th:block>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

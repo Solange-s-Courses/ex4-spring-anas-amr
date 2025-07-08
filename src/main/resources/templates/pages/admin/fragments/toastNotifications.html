@@ -1,0 +1,30 @@
+<!-- Toast for Success Messages -->
+<div th:fragment="toastNotifications"
+    class="toast-container position-fixed bottom-0 end-0 p-3"
+    style="z-index: 11">
+    <div id="passwordChangeToast"
+        class="toast align-items-center toast-orange border-0"
+        role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                Password changed successfully.
+            </div>
+            <button type="button"
+                class="btn-close btn-close-white me-2 m-auto"
+                data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div id="userActionToast"
+        class="toast align-items-center toast-orange border-0"
+        role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="userActionMessage">
+                User action completed successfully.
+            </div>
+            <button type="button"
+                class="btn-close btn-close-white me-2 m-auto"
+                data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
