@@ -50,9 +50,16 @@
             </div>
         </div>
 
-        <!-- Error Message -->
+        <!-- Error Messages -->
         <div th:if="${param.error}" class="alert alert-danger text-center">
             Invalid username or password. Please try again.
+        </div>
+
+        <!-- Blocked User Message -->
+        <div th:if="${param.blocked}" class="alert alert-warning text-center">
+            <i class="fas fa-user-lock me-2"></i>
+            Your account has been temporarily blocked. Please contact support
+            for assistance.
         </div>
 
         <!-- Submit Button -->

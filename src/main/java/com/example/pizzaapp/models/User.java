@@ -50,6 +50,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private boolean enabled = true;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
@@ -64,6 +67,7 @@ public class User {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.enabled = true;
     }
 
     @PrePersist

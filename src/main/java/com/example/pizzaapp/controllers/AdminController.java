@@ -89,6 +89,20 @@ public class AdminController {
     }
 
     /**
+     * Fix existing users - enable all users that might be disabled due to migration
+     */
+    @PostMapping("/users/unblockAll")
+    public String unblockAllUsers(RedirectAttributes redirectAttributes) {
+        try {
+            userService.enableAllExistingUsers();
+            redirectAttributes.addFlashAttribute("success", "All existing users have been unblocked successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to unblock users: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    /**
      * Update user role
      */
     @PostMapping("/users/{userId}/role")
@@ -128,5 +142,77 @@ public class AdminController {
     @ResponseBody
     public Product getProductDetails(@PathVariable UUID productId) {
         return productService.getProductById(productId);
+    }
+
+    /**
+     * Block/Unblock a user
+     */
+    @PostMapping("/users/{userId}/block")
+    public String toggleUserBlock(
+            @PathVariable UUID userId,
+            RedirectAttributes redirectAttributes) {
+        try {
+            User user = userService.getUserById(userId);
+            boolean wasBlocked = !user.isEnabled();
+
+            userService.toggleUserAccess(userId);
+
+            String action = wasBlocked ? "unblocked" : "blocked";
+            redirectAttributes.addFlashAttribute("success", "User has been " + action + " successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update user access: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    /**
+     * Show change password form for a user
+     */
+    @GetMapping("/users/{userId}/changePassword")
+    public String showChangePasswordForm(@PathVariable UUID userId, Model model) {
+        User user = userService.getUserById(userId);
+        model.addAttribute("user", user);
+        model.addAttribute("userId", userId);
+        return "pages/admin/changeUserPassword";
+    }
+
+    /**
+     * Change user password
+     */
+    @PostMapping("/users/changePassword")
+    public String changeUserPassword(
+            @RequestParam UUID userId,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword,
+            RedirectAttributes redirectAttributes) {
+        try {
+            if (!newPassword.equals(confirmPassword)) {
+                redirectAttributes.addFlashAttribute("error", "Passwords do not match");
+                return "redirect:/admin/users/" + userId + "/changePassword";
+            }
+
+            if (newPassword.length() < 3) {
+                redirectAttributes.addFlashAttribute("error", "Password must be at least 3 characters long");
+                return "redirect:/admin/users/" + userId + "/changePassword";
+            }
+
+            userService.changeUserPassword(userId, newPassword);
+            redirectAttributes.addFlashAttribute("success", "Password changed successfully!");
+            return "redirect:/admin/users";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to change password: " + e.getMessage());
+            return "redirect:/admin/users/" + userId + "/changePassword";
+        }
+    }
+
+    /**
+     * View user orders
+     */
+    @GetMapping("/users/{userId}/orders")
+    public String viewUserOrders(@PathVariable UUID userId, Model model) {
+        User user = userService.getUserById(userId);
+        model.addAttribute("user", user);
+        model.addAttribute("orders", user.getOrders());
+        return "pages/admin/userOrders";
     }
 }
