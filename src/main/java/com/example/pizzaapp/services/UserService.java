@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.pizzaapp.models.Role;
@@ -20,6 +21,9 @@ public class UserService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public User findUserByPrincipal(Principal principal) {
         if (principal == null) {
@@ -39,6 +43,25 @@ public class UserService {
      */
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    /**
+     * Ensure all existing users are enabled (for migration purposes)
+     */
+    public void enableAllExistingUsers() {
+        List<User> allUsers = userRepository.findAll();
+        boolean needsSave = false;
+
+        for (User user : allUsers) {
+            if (!user.isEnabled()) {
+                user.setEnabled(true);
+                needsSave = true;
+            }
+        }
+
+        if (needsSave) {
+            userRepository.saveAll(allUsers);
+        }
     }
 
     /**
@@ -75,18 +98,9 @@ public class UserService {
 
     /**
      * Toggle user account status (enable/disable)
-     * Note: This assumes you have an 'enabled' field in User model
-     * If not, this method will need to be adjusted based on your User model
      */
     public void toggleUserStatus(UUID userId) {
-        // Placeholder implementation - you can implement based on your needs
-        // You may need to add an 'enabled' field to the User model
-
-        // User user = getUserById(userId);
-        // user.setEnabled(!user.isEnabled());
-        // userRepository.save(user);
-
-        throw new RuntimeException("User status toggle not yet implemented - please add 'enabled' field to User model");
+        toggleUserAccess(userId);
     }
 
     /**
@@ -95,5 +109,62 @@ public class UserService {
     public boolean isAdmin(User user) {
         return user.getRoles().stream()
                 .anyMatch(role -> role.getName() == Role.RoleName.ROLE_ADMIN);
+    }
+
+    /**
+     * Block/Unblock a user by toggling their enabled status
+     * Only allows blocking of non-admin users
+     */
+    public void toggleUserAccess(UUID userId) {
+        User user = getUserById(userId);
+
+        // Prevent blocking of admin users
+        if (isAdmin(user)) {
+            throw new RuntimeException("Cannot block admin users");
+        }
+
+        user.setEnabled(!user.isEnabled());
+        userRepository.save(user);
+    }
+
+    /**
+     * Block a user (set enabled to false)
+     */
+    public void blockUser(UUID userId) {
+        User user = getUserById(userId);
+
+        // Prevent blocking of admin users
+        if (isAdmin(user)) {
+            throw new RuntimeException("Cannot block admin users");
+        }
+
+        user.setEnabled(false);
+        userRepository.save(user);
+    }
+
+    /**
+     * Unblock a user (set enabled to true)
+     */
+    public void unblockUser(UUID userId) {
+        User user = getUserById(userId);
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
+    /**
+     * Check if user is blocked
+     */
+    public boolean isUserBlocked(UUID userId) {
+        User user = getUserById(userId);
+        return !user.isEnabled();
+    }
+
+    /**
+     * Change user password
+     */
+    public void changeUserPassword(UUID userId, String newPassword) {
+        User user = getUserById(userId);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }
