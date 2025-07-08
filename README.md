@@ -362,9 +362,9 @@ src/
 
 ### Prerequisites
 
-- Java 23 or higher
+- Java 17 or higher
 - Maven 3.6+
-- MySQL 8.0+
+- MAMP (includes MySQL and Apache)
 - IDE (IntelliJ IDEA recommended)
 
 ### 1. Clone the Repository
@@ -374,13 +374,39 @@ git clone https://github.com/Solange-s-Courses/ex4-spring-anas-amr.git
 cd spring-pizza-app
 ```
 
-### 2. Database Setup
+### 2. MAMP Setup
+
+1. **Download and Install MAMP**
+   - Download MAMP from [https://www.mamp.info/](https://www.mamp.info/)
+   - Install MAMP with default settings
+
+2. **Start MAMP Services**
+   - Launch MAMP application
+   - Click "Start Servers" to start Apache and MySQL
+   - Default ports should be:
+     - Apache: 8888
+     - MySQL: 8889
+
+3. **Access phpMyAdmin**
+   - Open your browser and go to: `http://localhost:8888/phpMyAdmin/`
+   - Default credentials: username `root`, password `root`
+
+### 3. Database Setup
+
+Create the required database using phpMyAdmin:
 
 ```sql
 CREATE DATABASE pizzashop;
 ```
 
-### 3. Build and Run
+**Note**: Make sure your `application.properties` file is configured to use MAMP's MySQL port (8889):
+```properties
+spring.datasource.url=jdbc:mysql://localhost:8889/pizzashop
+spring.datasource.username=root
+spring.datasource.password=root
+```
+
+### 4. Build and Run
 
 ```bash
 # Build the project
