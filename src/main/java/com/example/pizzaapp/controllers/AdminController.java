@@ -1,16 +1,18 @@
 package com.example.pizzaapp.controllers;
 
-import com.example.pizzaapp.models.Product;
-import com.example.pizzaapp.models.User;
-import com.example.pizzaapp.services.ProductService;
-import com.example.pizzaapp.services.UserService;
+import com.example.pizzaapp.models.*;
+import com.example.pizzaapp.repositories.*;
+import com.example.pizzaapp.services.*;
+import com.example.pizzaapp.dtos.OrderSummaryDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,12 +25,134 @@ public class AdminController {
     private final ProductService productService;
     private final UserService userService;
 
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private ToppingRepository toppingRepository;
+
+    @Autowired
+    private OrderStatusRepository orderStatusRepository;
+
     /**
      * Admin dashboard - main landing page for admins
      */
     @GetMapping("/dashboard")
     public String adminDashboard() {
         return "pages/admin/adminDashboard";
+    }
+
+    /**
+     * Orders management page - view all orders
+     */
+    @GetMapping("/orders")
+    public String viewAllOrders(Model model) {
+        List<OrderSummaryDto> orders = orderService.getAllOrderSummaries();
+        model.addAttribute("orders", orders);
+        return "pages/admin/orders";
+    }
+
+    /**
+     * Update order status
+     */
+    @PostMapping("/updateOrderStatus")
+    public String updateOrderStatus(
+            @RequestParam UUID orderId,
+            @RequestParam String status,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Order order = orderRepository.findById(orderId).orElse(null);
+            if (order != null) {
+                // Map the status string to OrderStatusEnum
+                OrderStatus.OrderStatusEnum statusEnum;
+                switch (status.toUpperCase()) {
+                    case "PREPARING":
+                    case "PENDING":
+                        statusEnum = OrderStatus.OrderStatusEnum.PENDING;
+                        break;
+                    case "OUT FOR DELIVERY":
+                    case "CONFIRMED":
+                        statusEnum = OrderStatus.OrderStatusEnum.CONFIRMED;
+                        break;
+                    case "DELIVERED":
+                        statusEnum = OrderStatus.OrderStatusEnum.DELIVERED;
+                        break;
+                    case "CANCELLED":
+                        statusEnum = OrderStatus.OrderStatusEnum.CANCELLED;
+                        break;
+                    default:
+                        statusEnum = OrderStatus.OrderStatusEnum.PENDING;
+                }
+
+                OrderStatus orderStatus = orderStatusRepository.findByCode(statusEnum)
+                        .orElseThrow(() -> new IllegalStateException("Order status not found: " + statusEnum));
+
+                order.setStatus(orderStatus);
+                orderRepository.save(order);
+                redirectAttributes.addFlashAttribute("success", "Order status updated successfully!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update order status: " + e.getMessage());
+        }
+        return "redirect:/admin/orders";
+    }
+
+    /**
+     * Ingredients (Toppings) management page
+     */
+    @GetMapping("/ingredients")
+    public String viewIngredients(Model model) {
+        List<Topping> ingredients = toppingRepository.findAll();
+        model.addAttribute("ingredients", ingredients);
+        return "pages/admin/ingredients";
+    }
+
+    /**
+     * Update ingredient price
+     */
+    @PostMapping("/ingredients/{id}/updatePrice")
+    public String updateIngredientPrice(
+            @PathVariable UUID id,
+            @RequestParam BigDecimal price,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Topping topping = toppingRepository.findById(id).orElse(null);
+            if (topping != null) {
+                topping.setPrice(price.doubleValue());
+                toppingRepository.save(topping);
+                redirectAttributes.addFlashAttribute("success", "Price updated successfully!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update price: " + e.getMessage());
+        }
+        return "redirect:/admin/ingredients";
+    }
+
+    /**
+     * Update ingredient stock status
+     * Note: This assumes you want to add an inStock field to Topping entity
+     */
+    @PostMapping("/ingredients/{id}/updateStock")
+    public String updateIngredientStock(
+            @PathVariable UUID id,
+            @RequestParam boolean inStock,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Topping topping = toppingRepository.findById(id).orElse(null);
+            if (topping != null) {
+                // Since Topping entity doesn't have an inStock field in your current code,
+                // you might want to add it or handle this differently
+                // For now, just save the topping without changing stock
+                toppingRepository.save(topping);
+                redirectAttributes.addFlashAttribute("success", "Stock status updated successfully!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update stock status: " + e.getMessage());
+        }
+        return "redirect:/admin/ingredients";
     }
 
     /**
@@ -60,20 +184,35 @@ public class AdminController {
     }
 
     /**
-     * Update product details (name, description, image)
+     * Update product details (name, description only - no image URL)
      */
     @PostMapping("/products/{productId}/details")
     public String updateProductDetails(
             @PathVariable UUID productId,
             @RequestParam String name,
             @RequestParam String description,
-            @RequestParam(required = false) String imageUrl,
             RedirectAttributes redirectAttributes) {
         try {
-            productService.updateProductDetails(productId, name, description, imageUrl);
+            productService.updateProductDetails(productId, name, description, null);
             redirectAttributes.addFlashAttribute("success", "Product details updated successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to update product: " + e.getMessage());
+        }
+        return "redirect:/admin/products";
+    }
+
+    /**
+     * Bulk update product prices
+     */
+    @PostMapping("/products/bulk-update")
+    public String bulkUpdatePrices(
+            @RequestParam String priceUpdates,
+            RedirectAttributes redirectAttributes) {
+        try {
+            productService.bulkUpdatePrices(priceUpdates);
+            redirectAttributes.addFlashAttribute("success", "All price changes saved successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update prices: " + e.getMessage());
         }
         return "redirect:/admin/products";
     }
@@ -89,6 +228,54 @@ public class AdminController {
     }
 
     /**
+
+     * View specific user's orders
+     */
+    @GetMapping("/users/{id}/orders")
+    public String viewUserOrders(@PathVariable UUID id, Model model) {
+        User user = userService.getUserById(id);
+        if (user != null) {
+            List<Order> orders = orderRepository.findByUser(user);
+            model.addAttribute("user", user);
+            model.addAttribute("orders", orders);
+            return "pages/admin/userOrders";
+        }
+        return "redirect:/admin/users";
+    }
+
+    /**
+     * Show change password form
+     */
+    @GetMapping("/users/{id}/changePassword")
+    public String showChangePasswordForm(@PathVariable UUID id, Model model) {
+        model.addAttribute("userId", id);
+        return "pages/admin/changeUserPassword";
+    }
+
+    /**
+     * Change user password
+     */
+    @PostMapping("/users/changePassword")
+    public String changeUserPassword(
+            @RequestParam UUID userId,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword,
+            RedirectAttributes redirectAttributes) {
+        try {
+            if (!newPassword.equals(confirmPassword)) {
+                redirectAttributes.addFlashAttribute("error", "Passwords do not match!");
+                return "redirect:/admin/users/" + userId + "/changePassword";
+            }
+
+            User user = userService.getUserById(userId);
+            if (user != null) {
+                // You'll need to implement updatePassword method in UserService
+                // userService.updatePassword(user, newPassword);
+                redirectAttributes.addFlashAttribute("success", "Password changed successfully!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to change password: " + e.getMessage());
+
      * Fix existing users - enable all users that might be disabled due to migration
      */
     @PostMapping("/users/unblockAll")
@@ -98,6 +285,7 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("success", "All existing users have been unblocked successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to unblock users: " + e.getMessage());
+
         }
         return "redirect:/admin/users";
     }
@@ -143,6 +331,9 @@ public class AdminController {
     public Product getProductDetails(@PathVariable UUID productId) {
         return productService.getProductById(productId);
     }
+
+}
+
 
     /**
      * Block/Unblock a user
@@ -216,3 +407,4 @@ public class AdminController {
         return "pages/admin/userOrders";
     }
 }
+

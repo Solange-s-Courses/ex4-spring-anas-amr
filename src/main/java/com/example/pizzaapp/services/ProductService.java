@@ -4,9 +4,13 @@ import com.example.pizzaapp.models.Product;
 import com.example.pizzaapp.models.ProductOption;
 import com.example.pizzaapp.repositories.ProductRepository;
 import com.example.pizzaapp.repositories.ProductOptionRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,6 +19,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ProductService(ProductRepository productRepository, ProductOptionRepository productOptionRepository) {
         this.productRepository = productRepository;
@@ -73,6 +78,34 @@ public class ProductService {
         }
 
         productRepository.save(product);
+    }
+
+    /**
+     * Bulk update product prices
+     */
+    @Transactional
+    public void bulkUpdatePrices(String priceUpdatesJson) {
+        try {
+            // Parse the JSON string to a Map
+            Map<String, Double> priceUpdates = objectMapper.readValue(
+                    priceUpdatesJson,
+                    new TypeReference<Map<String, Double>>() {
+                    });
+
+            // Update each price
+            for (Map.Entry<String, Double> entry : priceUpdates.entrySet()) {
+                UUID optionId = UUID.fromString(entry.getKey());
+                Double newPrice = entry.getValue();
+
+                ProductOption option = productOptionRepository.findById(optionId)
+                        .orElseThrow(() -> new RuntimeException("Product option not found with id: " + optionId));
+
+                option.setPrice(newPrice);
+                productOptionRepository.save(option);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse price updates: " + e.getMessage(), e);
+        }
     }
 
     /**
