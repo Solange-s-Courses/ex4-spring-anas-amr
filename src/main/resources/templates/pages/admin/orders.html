@@ -28,7 +28,13 @@
         <div th:replace="~{layouts/navbar/adminNavbar :: adminNavbar}"></div>
 
         <div class="container my-5 container-custom">
-            <h1 class="text-center mb-4">All Orders</h1>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>All Orders</h1>
+                <button class="btn btn-secondary"
+                    onclick="window.location.href='/admin/dashboard'">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Back to Dashboard</button>
+            </div>
             <div th:if="${#lists.isEmpty(orders)}">
                 <p class="text-center">There are no orders yet.</p>
             </div>
@@ -116,11 +122,6 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-            <div class="d-flex justify-content-center mt-4">
-                <a href="/admin/dashboard" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
-                </a>
             </div>
         </div>
     </body>
