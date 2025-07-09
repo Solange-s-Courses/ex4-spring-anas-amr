@@ -11,10 +11,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
@@ -71,6 +74,96 @@ public class AdminController {
         List<OrderSummaryDto> orders = orderService.getAllOrderSummaries();
         model.addAttribute("orders", orders);
         return "pages/admin/orders";
+    }
+
+    /**
+     * Bulk update order statuses
+     */
+    @PostMapping("/orders/bulk-update-status")
+    public String bulkUpdateOrderStatuses(
+            @RequestParam String statusUpdates,
+            RedirectAttributes redirectAttributes) {
+        try {
+            // Parse the JSON string to a Map
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, String> statusUpdatesMap = objectMapper.readValue(
+                    statusUpdates,
+                    new TypeReference<Map<String, String>>() {
+                    });
+
+            int successCount = 0;
+            int failureCount = 0;
+
+            // Update each order status
+            for (Map.Entry<String, String> entry : statusUpdatesMap.entrySet()) {
+                try {
+                    UUID orderId = UUID.fromString(entry.getKey());
+                    String newStatusString = entry.getValue();
+
+                    Order order = orderRepository.findById(orderId)
+                            .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+
+                    // Map the status string to OrderStatusEnum
+                    OrderStatus.OrderStatusEnum statusEnum;
+                    switch (newStatusString.toUpperCase()) {
+                        case "PENDING":
+                            statusEnum = OrderStatus.OrderStatusEnum.PENDING;
+                            break;
+                        case "CONFIRMED":
+                            statusEnum = OrderStatus.OrderStatusEnum.CONFIRMED;
+                            break;
+                        case "DELIVERED":
+                            statusEnum = OrderStatus.OrderStatusEnum.DELIVERED;
+                            break;
+                        case "CANCELLED":
+                            statusEnum = OrderStatus.OrderStatusEnum.CANCELLED;
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Invalid status: " + newStatusString);
+                    }
+
+                    OrderStatus orderStatus = orderStatusRepository.findByCode(statusEnum)
+                            .orElseThrow(() -> new IllegalStateException("Order status not found: " + statusEnum));
+
+                    order.setStatus(orderStatus);
+                    orderRepository.save(order);
+                    successCount++;
+
+                } catch (Exception e) {
+                    failureCount++;
+                    // Log the error but continue with other updates
+                    System.err.println("Failed to update order: " + entry.getKey() + " - " + e.getMessage());
+                }
+            }
+
+            // Prepare feedback message
+            StringBuilder message = new StringBuilder();
+            if (successCount > 0) {
+                message.append("Successfully updated ").append(successCount).append(" order status");
+                if (successCount > 1)
+                    message.append("es");
+                message.append("!");
+            }
+            if (failureCount > 0) {
+                if (message.length() > 0)
+                    message.append(" ");
+                message.append(failureCount).append(" update");
+                if (failureCount > 1)
+                    message.append("s");
+                message.append(" failed.");
+            }
+
+            if (successCount > 0) {
+                redirectAttributes.addFlashAttribute("success", message.toString());
+            } else {
+                redirectAttributes.addFlashAttribute("error", message.toString());
+            }
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update order statuses: " + e.getMessage());
+        }
+
+        return "redirect:/admin/orders";
     }
 
     /**
@@ -169,6 +262,41 @@ public class AdminController {
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to update stock status: " + e.getMessage());
+        }
+        return "redirect:/admin/ingredients";
+    }
+
+    /**
+     * Bulk update ingredient prices
+     */
+    @PostMapping("/ingredients/bulk-update")
+    public String bulkUpdateIngredientPrices(
+            @RequestParam String priceUpdates,
+            RedirectAttributes redirectAttributes) {
+        try {
+            // Parse the JSON string to a Map
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Double> priceUpdatesMap = objectMapper.readValue(
+                    priceUpdates,
+                    new TypeReference<Map<String, Double>>() {
+                    });
+
+            // Update each ingredient price
+            for (Map.Entry<String, Double> entry : priceUpdatesMap.entrySet()) {
+                UUID ingredientId = UUID.fromString(entry.getKey());
+                Double newPrice = entry.getValue();
+
+                Topping topping = toppingRepository.findById(ingredientId)
+                        .orElseThrow(() -> new RuntimeException("Ingredient not found with id: " + ingredientId));
+
+                topping.setPrice(newPrice);
+                toppingRepository.save(topping);
+            }
+
+            redirectAttributes.addFlashAttribute("success",
+                    "Successfully updated " + priceUpdatesMap.size() + " ingredient price(s)!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update prices: " + e.getMessage());
         }
         return "redirect:/admin/ingredients";
     }
