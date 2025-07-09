@@ -115,16 +115,16 @@ public class CheckoutController {
             // Validate and clean cart items
             List<CartItemDto> validCartItems = cartService.validateAndCleanCartItems(cartItems);
             int invalidItemsCount = cartService.getInvalidItemsCount(cartItems, validCartItems);
-            
+
             if (cartService.isCartEmpty(validCartItems)) {
-                redirectAttributes.addFlashAttribute("error", 
-                    "All items in your cart are no longer available. Please add new items to your cart.");
+                redirectAttributes.addFlashAttribute("error",
+                        "All items in your cart are no longer available. Please add new items to your cart.");
                 return "redirect:/cart";
             }
-            
+
             if (invalidItemsCount > 0) {
-                redirectAttributes.addFlashAttribute("warning", 
-                    String.format("%d item(s) were removed from your cart because they are no longer available.", 
+                redirectAttributes.addFlashAttribute("warning",
+                        String.format("%d item(s) were removed from your cart because they are no longer available.",
                                 invalidItemsCount));
                 // Continue with valid items
             }
@@ -137,15 +137,16 @@ public class CheckoutController {
             }
 
             // Create and save the order
-            orderService.createAndSaveOrder(user, validCartItems, selectedAddress.getFullAddress(), paymentMethod);
+            orderService.createAndSaveOrder(user, validCartItems, selectedAddress.getFullAddress(), paymentMethod,
+                    billingPhone);
 
             redirectAttributes.addFlashAttribute("success", "Order placed successfully!");
             return "redirect:/order/confirmation";
 
         } catch (IllegalArgumentException e) {
             logger.error("Validation error during order submission: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", 
-                "Cart validation failed: " + e.getMessage() + " Please refresh your cart and try again.");
+            redirectAttributes.addFlashAttribute("error",
+                    "Cart validation failed: " + e.getMessage() + " Please refresh your cart and try again.");
             return "redirect:/cart";
         } catch (Exception e) {
             logger.error("Error processing order submission", e);

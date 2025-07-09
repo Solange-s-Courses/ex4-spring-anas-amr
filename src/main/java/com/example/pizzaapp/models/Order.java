@@ -42,18 +42,22 @@ public class Order {
     @Column(name = "delivery_address", nullable = false)
     private String deliveryAddress;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     private Double totalPrice;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items = new ArrayList<>();
 
     public Order(User user, Double totalPrice, List<OrderItem> items, String deliveryAddress,
-            PaymentMethod paymentMethod) {
+            PaymentMethod paymentMethod, String phoneNumber) {
         this.user = user;
         this.totalPrice = totalPrice;
         this.items = items;
         this.deliveryAddress = deliveryAddress;
         this.paymentMethod = paymentMethod;
+        this.phoneNumber = phoneNumber;
     }
 
     @PrePersist

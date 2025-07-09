@@ -53,7 +53,7 @@ public class OrderService {
     private PricingService pricingService;
 
     public Order createAndSaveOrder(User user, List<CartItemDto> cartItems, String deliveryAddress,
-            PaymentMethod paymentMethod) {
+            PaymentMethod paymentMethod, String phoneNumber) {
         // Build OrderItem objects
         List<OrderItem> orderItems = buildOrderItems(cartItems);
 
@@ -66,7 +66,7 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalStateException("PENDING order status not found in database"));
 
         // Create and save the order
-        Order order = new Order(user, totalPrice, orderItems, deliveryAddress, paymentMethod);
+        Order order = new Order(user, totalPrice, orderItems, deliveryAddress, paymentMethod, phoneNumber);
         order.setStatus(pendingStatus);
 
         // Set the order reference for each OrderItem
@@ -179,7 +179,8 @@ public class OrderService {
                 order.getItems().size(),
                 order.getDeliveryAddress(),
                 order.getUser().getUsername(),
-                order.getUser().getEmail());
+                order.getUser().getEmail(),
+                order.getPhoneNumber());
     }
 
     private OrderDetailDto mapToOrderDetailDto(Order order) {

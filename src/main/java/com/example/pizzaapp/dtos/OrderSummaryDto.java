@@ -20,4 +20,5 @@ public class OrderSummaryDto {
     private String deliveryAddress;
     private String customerName;
     private String customerEmail;
+    private String customerPhone;
 }
