@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
     <head>
-        <title>Manage Products & Prices</title>
+        <title>Admin - Products & Prices</title>
         <link
             href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
             rel="stylesheet">
@@ -40,7 +40,7 @@
         }
     </style>
     </head>
-    <body>
+    <body style="margin-top: 140px;">
 
         <div th:replace="~{layouts/navbar/adminNavbar :: adminNavbar}"></div>
 
@@ -74,10 +74,13 @@
             </div>
 
             <!-- Bulk Save Form -->
-            <form id="bulkSaveForm" th:action="@{/admin/products/bulk-update}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="hidden" id="priceUpdatesJson" name="priceUpdates" />
-                
+            <form id="bulkSaveForm" th:action="@{/admin/products/bulk-update}"
+                method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}"
+                    th:value="${_csrf.token}" />
+                <input type="hidden" id="priceUpdatesJson"
+                    name="priceUpdates" />
+
                 <!-- Products Grid -->
                 <div class="row">
                     <div class="col-lg-6 col-xl-4 mb-4"
@@ -92,7 +95,8 @@
                                     onerror="this.src='/assets/images/default-product.png'">
                                 <div>
                                     <h5 class="mb-0"
-                                        th:text="${product.name}">Product Name</h5>
+                                        th:text="${product.name}">Product
+                                        Name</h5>
                                     <small
                                         th:text="${product.category?.name}">Category</small>
                                 </div>
@@ -107,7 +111,8 @@
                                 <!-- Price Options -->
                                 <div class="mb-3">
                                     <h6 class="fw-bold mb-2">
-                                        <i class="fas fa-tag me-1"></i>Price Options
+                                        <i class="fas fa-tag me-1"></i>Price
+                                        Options
                                     </h6>
                                     <div th:if="${!product.options.empty}">
                                         <div class="mb-2"
@@ -116,7 +121,8 @@
                                                 class="d-flex justify-content-between align-items-center">
                                                 <span class="badge bg-secondary"
                                                     th:text="${option.size}">SIZE</span>
-                                                <div class="d-flex align-items-center">
+                                                <div
+                                                    class="d-flex align-items-center">
                                                     <span class="me-2">₪</span>
                                                     <input type="number"
                                                         th:data-option-id="${option.id}"
@@ -132,7 +138,8 @@
                                     </div>
                                     <div th:if="${product.options.empty}"
                                         class="text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>No
+                                        <i
+                                            class="fas fa-info-circle me-1"></i>No
                                         price options available
                                     </div>
                                 </div>
@@ -149,7 +156,8 @@
                         </div>
 
                         <!-- Edit Product Modal (Without Image URL) -->
-                        <div class="modal fade" th:id="'editModal' + ${product.id}"
+                        <div class="modal fade"
+                            th:id="'editModal' + ${product.id}"
                             tabindex="-1">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -164,10 +172,13 @@
                                     <form
                                         th:action="@{'/admin/products/' + ${product.id} + '/details'}"
                                         method="post">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <input type="hidden"
+                                            th:name="${_csrf.parameterName}"
+                                            th:value="${_csrf.token}" />
                                         <div class="modal-body">
                                             <div class="mb-3">
-                                                <label class="form-label">Product
+                                                <label
+                                                    class="form-label">Product
                                                     Name</label>
                                                 <input type="text"
                                                     name="name"
@@ -190,7 +201,8 @@
                                                 data-bs-dismiss="modal">Cancel</button>
                                             <button type="submit"
                                                 class="btn btn-primary">
-                                                <i class="fas fa-save me-1"></i>Save
+                                                <i
+                                                    class="fas fa-save me-1"></i>Save
                                                 Changes
                                             </button>
                                         </div>
@@ -212,11 +224,11 @@
         </div>
 
         <!-- Floating Save All Button -->
-        <button type="button" 
-                id="saveAllButton"
-                class="btn btn-lg btn-success save-all-button" 
-                style="display: none;"
-                onclick="saveAllPrices()">
+        <button type="button"
+            id="saveAllButton"
+            class="btn btn-lg btn-success save-all-button"
+            style="display: none;"
+            onclick="saveAllPrices()">
             <i class="fas fa-save me-2"></i>Save All Changes
         </button>
 
