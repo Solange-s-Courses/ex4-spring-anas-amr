@@ -16,118 +16,305 @@
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
             rel="stylesheet">
         <style>
+            body {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+            }
+            
+            .ingredients-container {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            
+            .ingredients-page-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border-radius: 15px 15px 0 0;
+                padding: 2rem;
+                margin: -2rem -2rem 2rem -2rem;
+            }
+            
+            .ingredient-card {
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                transition: all 0.3s ease;
+                margin-bottom: 1.5rem;
+                overflow: hidden;
+                position: relative;
+            }
+            
+            .ingredient-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            }
+            
+            .ingredient-card.price-changed {
+                border-left: 5px solid #28a745;
+                background: linear-gradient(135deg, #d4edda 0%, #ffffff 100%);
+            }
+            
+            .ingredient-header {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                padding: 1.25rem;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            }
+            
+            .ingredient-body {
+                padding: 1.5rem;
+            }
+            
+            .ingredient-image {
+                width: 60px;
+                height: 60px;
+                object-fit: cover;
+                border-radius: 12px;
+                border: 3px solid #e9ecef;
+                transition: all 0.3s ease;
+            }
+            
+            .ingredient-image:hover {
+                transform: scale(1.1);
+                border-color: #667eea;
+            }
+            
+            .ingredient-placeholder {
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: #6c757d;
+                border: 3px solid #e9ecef;
+            }
+            
             .price-input {
-                width: 120px;
+                border-radius: 12px;
+                border: 2px solid #e9ecef;
+                padding: 0.75rem 1rem;
+                font-weight: 600;
+                font-size: 1.1rem;
+                transition: all 0.3s ease;
+                background: white;
             }
-            .price-changed {
-                background-color: #fff3cd;
-                border-color: #ffc107;
+            
+            .price-input:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+                transform: scale(1.02);
             }
+            
+            .price-input.price-changed {
+                border-color: #28a745;
+                background: linear-gradient(135deg, #d4edda 0%, #ffffff 100%);
+                color: #155724;
+            }
+            
+            
+            .ingredient-name {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background-clip: text;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                font-weight: 700;
+                font-size: 1.2rem;
+            }
+            
             .save-all-button {
                 position: fixed;
                 bottom: 30px;
                 right: 30px;
                 z-index: 1000;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                border-radius: 50px;
+                padding: 1rem 2rem;
+                box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                border: none;
+                animation: pulse 2s infinite;
             }
-            .ingredient-image {
-                width: 50px;
-                height: 50px;
-                object-fit: cover;
-                border-radius: 5px;
+            
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            
+            .empty-state {
+                text-align: center;
+                padding: 4rem 2rem;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            }
+            
+            .empty-state-icon {
+                font-size: 4rem;
+                color: #6c757d;
+                margin-bottom: 1.5rem;
+            }
+            
+            .back-btn {
+                background: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                border-radius: 10px;
+                padding: 0.75rem 1.5rem;
+                transition: all 0.3s ease;
+            }
+            
+            .back-btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+                color: white;
+                transform: translateY(-2px);
+            }
+            
+            .price-section {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-top: 1rem;
+            }
+            
+            .currency-symbol {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #28a745;
             }
         </style>
     </head>
-    <body style="margin-top: 140px;">
+    <body style="margin-top: 140px; padding-bottom: 2rem;">
         <div th:replace="~{layouts/navbar/adminNavbar :: adminNavbar}"></div>
 
         <div class="container mt-5">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1><i class="fas fa-leaf me-2"></i>Manage Ingredients</h1>
-                <button class="btn btn-secondary"
-                    onclick="window.location.href='/admin/dashboard'">
-                    <i class="fas fa-arrow-left me-1"></i>
-                    Back to Dashboard
-                </button>
-            </div>
-
-            <!-- Success/Error Messages -->
-            <div th:if="${success}"
-                class="alert alert-success alert-dismissible fade show"
-                role="alert">
-                <i class="fas fa-check-circle me-2"></i>
-                <span th:text="${success}"></span>
-                <button type="button" class="btn-close"
-                    data-bs-dismiss="alert"></button>
-            </div>
-
-            <div th:if="${error}"
-                class="alert alert-danger alert-dismissible fade show"
-                role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <span th:text="${error}"></span>
-                <button type="button" class="btn-close"
-                    data-bs-dismiss="alert"></button>
-            </div>
-
-            <!-- Bulk Save Form -->
-            <form id="bulkSaveForm" th:action="@{/admin/ingredients/bulk-update}"
-                method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}"
-                    th:value="${_csrf.token}" />
-                <input type="hidden" id="priceUpdatesJson"
-                    name="priceUpdates" />
-
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>Image</th>
-                                        <th>Name</th>
-                                        <th>Current Price</th>
-                                        <th>New Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="ingredient : ${ingredients}">
-                                        <td>
-                                            <img th:if="${ingredient.imageUrl}"
-                                                th:src="@{${ingredient.imageUrl}}"
-                                                th:alt="${ingredient.name}"
-                                                class="ingredient-image"
-                                                onerror="this.src='/assets/images/default-ingredient.png'">
-                                            <div th:unless="${ingredient.imageUrl}"
-                                                class="ingredient-image bg-light d-flex align-items-center justify-content-center">
-                                                <i class="fas fa-leaf text-muted"></i>
-                                            </div>
-                                        </td>
-                                        <td class="align-middle">
-                                            <strong th:text="${ingredient.name}"></strong>
-                                        </td>
-                                        <td class="align-middle">
-                                            <span class="text-muted">₪<span th:text="${ingredient.price}"></span></span>
-                                        </td>
-                                        <td class="align-middle">
-                                            <div class="d-flex align-items-center">
-                                                <span class="me-2">₪</span>
-                                                <input type="number" step="0.01" 
-                                                    th:data-ingredient-id="${ingredient.id}"
-                                                    th:data-original-price="${ingredient.price}"
-                                                    th:value="${ingredient.price}"
-                                                    min="0"
-                                                    class="form-control price-input"
-                                                    onchange="trackPriceChange(this)">
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+            <div class="ingredients-container" style="padding: 2rem;">
+                <div class="ingredients-page-header">
+                    <div
+                        class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="mb-2">
+                                <i class="fas fa-leaf me-3"></i>
+                                Ingredient Management
+                            </h1>
+                            <p class="mb-0 opacity-75">Manage pricing and
+                                availability of all ingredients</p>
                         </div>
+                        <button class="back-btn"
+                            onclick="window.location.href='/admin/dashboard'">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Back to Dashboard
+                        </button>
                     </div>
                 </div>
-            </form>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${success}"
+                    class="alert alert-success alert-dismissible fade show"
+                    role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close"
+                        data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${error}"
+                    class="alert alert-danger alert-dismissible fade show"
+                    role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close"
+                        data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${#lists.isEmpty(ingredients)}" class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3 class="text-muted mb-3">No ingredients found</h3>
+                    <p class="text-muted mb-0">There are no ingredients
+                        configured yet.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(ingredients)}">
+                    <!-- Bulk Save Form -->
+                    <form id="bulkSaveForm"
+                        th:action="@{/admin/ingredients/bulk-update}"
+                        method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}"
+                            th:value="${_csrf.token}" />
+                        <input type="hidden" id="priceUpdatesJson"
+                            name="priceUpdates" />
+
+                        <div class="row">
+                            <div class="col-lg-6 col-xl-4"
+                                th:each="ingredient : ${ingredients}">
+                                <div class="ingredient-card"
+                                    th:data-ingredient-id="${ingredient.id}">
+                                    <div class="ingredient-header">
+                                        <div
+                                            class="d-flex align-items-center gap-3">
+                                            <div th:if="${ingredient.imageUrl}">
+                                                <img
+                                                    th:src="@{${ingredient.imageUrl}}"
+                                                    th:alt="${ingredient.name}"
+                                                    class="ingredient-image"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                <div
+                                                    class="ingredient-placeholder"
+                                                    style="display: none;">
+                                                    <i class="fas fa-leaf"></i>
+                                                </div>
+                                            </div>
+                                            <div
+                                                th:unless="${ingredient.imageUrl}"
+                                                class="ingredient-placeholder">
+                                                <i class="fas fa-leaf"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h5 class="ingredient-name mb-1"
+                                                    th:text="${ingredient.name}">Ingredient
+                                                    Name</h5>
+                                                <span class="current-price">
+                                                    Current: ₪<span
+                                                        th:text="${ingredient.price}">5.99</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="ingredient-body">
+                                        <div class="price-section">
+                                            <span
+                                                class="currency-symbol">₪</span>
+                                            <input type="number"
+                                                step="0.01"
+                                                th:data-ingredient-id="${ingredient.id}"
+                                                th:data-original-price="${ingredient.price}"
+                                                th:value="${ingredient.price}"
+                                                min="0"
+                                                max="999.99"
+                                                class="form-control price-input flex-grow-1"
+                                                onchange="trackPriceChange(this)"
+                                                placeholder="Enter new price">
+                                        </div>
+                                        <small class="text-muted mt-2 d-block">
+                                            <i
+                                                class="fas fa-info-circle me-1"></i>
+                                            Update the price for this ingredient
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <!-- Floating Save All Button -->
@@ -148,12 +335,17 @@
                 const originalPrice = parseFloat(input.dataset.originalPrice);
                 const newPrice = parseFloat(input.value);
                 
-                if (originalPrice !== newPrice) {
+                // Find the parent ingredient card
+                const ingredientCard = document.querySelector(`[data-ingredient-id="${ingredientId}"]`);
+                
+                if (originalPrice !== newPrice && !isNaN(newPrice)) {
                     priceChanges[ingredientId] = newPrice;
                     input.classList.add('price-changed');
+                    ingredientCard.classList.add('price-changed');
                 } else {
                     delete priceChanges[ingredientId];
                     input.classList.remove('price-changed');
+                    ingredientCard.classList.remove('price-changed');
                 }
                 
                 // Show/hide save button

@@ -88,6 +88,13 @@
                 font-weight: 600;
                 border: 2px solid transparent;
                 transition: all 0.3s ease;
+                cursor: pointer;
+                position: relative;
+            }
+            
+            .status-select:hover {
+                transform: scale(1.02);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             }
             
             .status-select:focus {
@@ -339,14 +346,16 @@
                                                 class="col-xl-2 col-lg-4 col-md-6 mb-3">
                                                 <div class="order-meta">
                                                     <i
-                                                        class="fas fa-cogs text-warning"></i>
+                                                        class="fas fa-edit text-warning"></i>
                                                     <strong>Status:</strong>
+
                                                 </div>
                                                 <select
                                                     class="form-select status-select ms-3"
                                                     th:data-order-id="${order.id}"
                                                     th:data-original-status="${order.status}"
-                                                    onchange="trackStatusChange(this)">
+                                                    onchange="trackStatusChange(this)"
+                                                    title="Click to change order status">
                                                     <option value="PENDING"
                                                         th:selected="${order.status == 'PENDING'}">
                                                         🟡 Pending
