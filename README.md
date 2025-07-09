@@ -82,6 +82,7 @@ erDiagram
         string username UK
         string password
         string email UK
+        boolean enabled
         timestamp created_at
     }
 
@@ -112,6 +113,7 @@ erDiagram
         enum status_code FK "PENDING, CONFIRMED, DELIVERED, CANCELLED"
         enum payment_method_code FK "CASH, CARD, PAYPAL"
         string delivery_address
+        string phone_number
         decimal total_price
     }
 
@@ -174,6 +176,11 @@ erDiagram
         decimal price
     }
 
+    ORDER_ITEM_TOPPING_ID {
+        UUID order_item_id
+        UUID topping_id
+    }
+
     %% Relationships
     USERS ||--o{ USER_ROLE : "has"
     ROLES ||--o{ USER_ROLE : "assigned_to"
@@ -195,6 +202,7 @@ erDiagram
 
     ORDER_ITEMS ||--o{ ORDER_ITEM_TOPPING : "has"
     TOPPINGS ||--o{ ORDER_ITEM_TOPPING : "used_in"
+    ORDER_ITEM_TOPPING ||--|| ORDER_ITEM_TOPPING_ID : "uses_composite_key"
 ```
 
 ## 🗄️ Database Schema Details
@@ -377,10 +385,12 @@ cd spring-pizza-app
 ### 2. MAMP Setup
 
 1. **Download and Install MAMP**
+
    - Download MAMP from [https://www.mamp.info/](https://www.mamp.info/)
    - Install MAMP with default settings
 
 2. **Start MAMP Services**
+
    - Launch MAMP application
    - Click "Start Servers" to start Apache and MySQL
    - Default ports should be:
@@ -400,6 +410,7 @@ CREATE DATABASE pizzashop;
 ```
 
 **Note**: Make sure your `application.properties` file is configured to use MAMP's MySQL port (8889):
+
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:8889/pizzashop
 spring.datasource.username=root
