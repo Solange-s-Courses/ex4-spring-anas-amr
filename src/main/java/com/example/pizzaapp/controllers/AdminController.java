@@ -32,16 +32,34 @@ public class AdminController {
     private OrderRepository orderRepository;
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
     private ToppingRepository toppingRepository;
 
     @Autowired
     private OrderStatusRepository orderStatusRepository;
 
     /**
-     * Admin dashboard - main landing page for admins
+     * Admin dashboard - main landing page for admins with statistics
      */
     @GetMapping("/dashboard")
-    public String adminDashboard() {
+    public String adminDashboard(Model model) {
+        // Get statistics for dashboard
+        long totalOrders = orderRepository.count();
+        long totalUsers = userRepository.count();
+        long totalProducts = productRepository.count();
+        long totalIngredients = toppingRepository.count(); // Toppings are ingredients
+
+        // Add statistics to model
+        model.addAttribute("totalOrders", totalOrders);
+        model.addAttribute("totalUsers", totalUsers);
+        model.addAttribute("totalProducts", totalProducts);
+        model.addAttribute("totalIngredients", totalIngredients);
+
         return "pages/admin/adminDashboard";
     }
 

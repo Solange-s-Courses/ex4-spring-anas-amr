@@ -19,55 +19,232 @@
     <body>
         <div th:replace="~{layouts/navbar/adminNavbar :: adminNavbar}"></div>
 
-        <div class="dashboard-container">
-            <div class="container dashboard-content">
-                <h2 class="mb-4">Welcome, Admin</h2>
-                <div class="row">
-                    <div class="col-md-4 mb-4">
-                        <div class="card dashboard-card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">Manage Orders</h5>
-                                <p class="card-text">View and manage all orders
-                                    placed by users.</p>
-                                <a th:href="@{/admin/orders}"
-                                    class="btn btn-primary">Go to Orders</a>
+        <div class="admin-dashboard-wrapper">
+            <div class="container-fluid px-4 py-5">
+                <!-- Header Section -->
+                <div class="row mb-5">
+                    <div class="col-12">
+                        <div class="welcome-header">
+                            <h1 class="display-4 fw-bold text-dark mb-2">
+                                <i
+                                    class="fas fa-tachometer-alt text-primary me-3"></i>
+                                Admin Dashboard
+                            </h1>
+                            <p class="lead text-muted">Manage your pizza
+                                business efficiently</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-5">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stat-card bg-gradient-primary">
+                            <div class="stat-card-body">
+                                <div class="stat-icon">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-number"
+                                        th:text="${totalOrders ?: '0'}">0</div>
+                                    <div class="stat-label">Total Orders</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card dashboard-card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">Manage Ingredients</h5>
-                                <p class="card-text">Change the price and stock
-                                    availability of ingredients.</p>
-                                <a th:href="@{/admin/ingredients}"
-                                    class="btn btn-primary">Go to
-                                    Ingredients</a>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stat-card bg-gradient-success">
+                            <div class="stat-card-body">
+                                <div class="stat-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-number"
+                                        th:text="${totalUsers ?: '0'}">0</div>
+                                    <div class="stat-label">Registered
+                                        Users</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card dashboard-card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">See All Users</h5>
-                                <p class="card-text">View and manage registered
-                                    users.</p>
-                                <a th:href="@{/admin/users}"
-                                    class="btn btn-primary">Go to Users</a>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stat-card bg-gradient-warning">
+                            <div class="stat-card-body">
+                                <div class="stat-icon">
+                                    <i class="fas fa-pizza-slice"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-number"
+                                        th:text="${totalProducts ?: '0'}">0</div>
+                                    <div class="stat-label">Active
+                                        Products</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stat-card bg-gradient-info">
+                            <div class="stat-card-body">
+                                <div class="stat-icon">
+                                    <i class="fas fa-leaf"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-number"
+                                        th:text="${totalIngredients ?: '0'}">0</div>
+                                    <div class="stat-label">Ingredients</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Management Cards -->
                 <div class="row">
-                    <div class="col-md-4 mb-4">
-                        <div class="card dashboard-card text-center">
-                            <div class="card-body">
-                                <h5 class="card-title">Manage Products &
-                                    Prices</h5>
-                                <p class="card-text">Update product prices,
-                                    details, and availability.</p>
-                                <a th:href="@{/admin/products}"
-                                    class="btn btn-primary">Go to Products</a>
+                    <div class="col-12 mb-4">
+                        <h3 class="fw-bold text-dark mb-4">
+                            <i class="fas fa-cogs text-primary me-2"></i>
+                            Management Tools
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6 col-xl-4 mb-4">
+                        <div class="management-card">
+                            <div class="management-card-header bg-orders">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="management-card-body">
+                                <h5 class="card-title fw-bold">Order
+                                    Management</h5>
+                                <p class="card-text text-muted">View, track, and
+                                    manage all customer orders. Monitor order
+                                    status and delivery progress.</p>
+                                <div class="management-card-footer">
+                                    <a th:href="@{/admin/orders}"
+                                        class="btn btn-outline-primary btn-modern">
+                                        <i
+                                            class="fas fa-arrow-right me-2"></i>Manage
+                                        Orders
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-xl-4 mb-4">
+                        <div class="management-card">
+                            <div class="management-card-header bg-users">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="management-card-body">
+                                <h5 class="card-title fw-bold">User
+                                    Management</h5>
+                                <p class="card-text text-muted">View and manage
+                                    registered users, control access
+                                    permissions, and monitor user activity.</p>
+                                <div class="management-card-footer">
+                                    <a th:href="@{/admin/users}"
+                                        class="btn btn-outline-success btn-modern">
+                                        <i
+                                            class="fas fa-arrow-right me-2"></i>Manage
+                                        Users
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-xl-4 mb-4">
+                        <div class="management-card">
+                            <div class="management-card-header bg-products">
+                                <i class="fas fa-pizza-slice"></i>
+                            </div>
+                            <div class="management-card-body">
+                                <h5 class="card-title fw-bold">Product
+                                    Management</h5>
+                                <p class="card-text text-muted">Update product
+                                    prices, details, availability, and manage
+                                    your pizza menu offerings.</p>
+                                <div class="management-card-footer">
+                                    <a th:href="@{/admin/products}"
+                                        class="btn btn-outline-warning btn-modern">
+                                        <i
+                                            class="fas fa-arrow-right me-2"></i>Manage
+                                        Products
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-xl-4 mb-4">
+                        <div class="management-card">
+                            <div class="management-card-header bg-ingredients">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <div class="management-card-body">
+                                <h5 class="card-title fw-bold">Ingredient
+                                    Management</h5>
+                                <p class="card-text text-muted">Control
+                                    ingredient pricing, stock levels, and
+                                    availability for all menu items.</p>
+                                <div class="management-card-footer">
+                                    <a th:href="@{/admin/ingredients}"
+                                        class="btn btn-outline-info btn-modern">
+                                        <i
+                                            class="fas fa-arrow-right me-2"></i>Manage
+                                        Ingredients
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-xl-4 mb-4">
+                        <div class="management-card">
+                            <div class="management-card-header bg-analytics">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="management-card-body">
+                                <h5 class="card-title fw-bold">Analytics &
+                                    Reports</h5>
+                                <p class="card-text text-muted">View sales
+                                    reports, user analytics, and business
+                                    performance metrics.</p>
+                                <div class="management-card-footer">
+                                    <a href="#"
+                                        class="btn btn-outline-secondary btn-modern"
+                                        onclick="alert('Coming Soon!')">
+                                        <i
+                                            class="fas fa-arrow-right me-2"></i>View
+                                        Analytics
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 col-xl-4 mb-4">
+                        <div class="management-card">
+                            <div class="management-card-header bg-settings">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="management-card-body">
+                                <h5 class="card-title fw-bold">System
+                                    Settings</h5>
+                                <p class="card-text text-muted">Configure
+                                    application settings, manage system
+                                    preferences, and update configurations.</p>
+                                <div class="management-card-footer">
+                                    <a href="#"
+                                        class="btn btn-outline-dark btn-modern"
+                                        onclick="alert('Coming Soon!')">
+                                        <i
+                                            class="fas fa-arrow-right me-2"></i>System
+                                        Settings
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
