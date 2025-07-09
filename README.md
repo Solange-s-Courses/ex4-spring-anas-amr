@@ -538,21 +538,22 @@ mvn spring-boot:run
 - [ ] Multi-language support
 - [ ] Delivery tracking system
 
-## � Authors
+## 👥 Authors
 
-<div align="center">
+<div >
 
 ### 🚀 Development Team
 
-</div>
-
-<table>
+<table align="center">
 <tr>
 <td align="center" width="50%">
-<img src="https://github.com/Anas-Emad-Dweik.png" width="120px" alt="Anas Dweik"/>
+<a href="https://github.com/Anas-Emad-Dweik">
+<img src="https://github.com/Anas-Emad-Dweik.png" width="120px" alt="Anas Dweik" style="border-radius: 50%;"/>
+</a>
 <br/>
-<h3>� Anas Dweik</h3>
+<h3>💻 Anas Dweik</h3>
 <p><strong>Full Stack Developer</strong></p>
+<p><em>Backend Specialist</em></p>
 
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Anas-Emad-Dweik)
 [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:aansdw@edu.jmc.ac.il)
@@ -560,7 +561,7 @@ mvn spring-boot:run
 **Student ID:** `322362013`
 
 <details>
-<summary>🛠️ <strong>Contributions</strong></summary>
+<summary>🛠️ <strong>Key Contributions</strong></summary>
 
 - 🏗️ **Backend Architecture** - Spring Boot setup & configuration
 - 🔐 **Security Implementation** - Authentication & authorization
@@ -572,10 +573,13 @@ mvn spring-boot:run
 </td>
 
 <td align="center" width="50%">
-<img src="https://github.com/Amr-Shwieky2.png" width="120px" alt="Amr Shwiki"/>
+<a href="https://github.com/Amr-Shwieky2">
+<img src="https://github.com/Amr-Shwieky2.png" width="120px" alt="Amr Shwiki" style="border-radius: 50%;"/>
+</a>
 <br/>
 <h3>🎨 Amr Shwiki</h3>
 <p><strong>Full Stack Developer</strong></p>
+<p><em>Frontend Specialist</em></p>
 
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Amr-Shwieky2)
 [![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:amrsh@edu.jmc.ac.il)
@@ -583,7 +587,7 @@ mvn spring-boot:run
 **Student ID:** `212443485`
 
 <details>
-<summary>🛠️ <strong>Contributions</strong></summary>
+<summary>🛠️ <strong>Key Contributions</strong></summary>
 
 - 🎨 **UI/UX Design** - Modern responsive interface design
 - 🌐 **Frontend Development** - Thymeleaf templates & styling
@@ -595,6 +599,8 @@ mvn spring-boot:run
 </td>
 </tr>
 </table>
+
+</div>
 
 <div align="center">
 
