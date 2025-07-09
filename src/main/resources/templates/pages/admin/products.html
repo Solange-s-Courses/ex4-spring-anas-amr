@@ -11,48 +11,34 @@
         <link
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
             rel="stylesheet">
-        <style>
-        .product-card {
-            transition: transform 0.2s;
-        }
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .price-input {
-            width: 100px;
-        }
-        .product-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-        }
-        .save-all-button {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .price-changed {
-            background-color: #fff3cd;
-            border-color: #ffc107;
-        }
-    </style>
     </head>
-    <body style="margin-top: 140px;">
-
+    <body>
         <div th:replace="~{layouts/navbar/adminNavbar :: adminNavbar}"></div>
 
-        <div class="container mt-4 mb-5">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-pizza-slice me-2"></i>Manage Products &
-                    Prices</h2>
-                <a th:href="@{/admin/dashboard}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
-                </a>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="hero-title">
+                            <i class="fas fa-pizza-slice me-3"></i>Products &
+                            Pricing Management
+                        </h1>
+                        <p class="hero-subtitle">Manage your menu items, update
+                            prices, and edit product details</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a th:href="@{/admin/dashboard}"
+                            class="btn btn-outline-dark btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Back to
+                            Dashboard
+                        </a>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <div class="container mt-4 mb-5">
 
             <!-- Success/Error Messages -->
             <div th:if="${success}"
