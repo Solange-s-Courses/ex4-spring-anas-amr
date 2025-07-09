@@ -235,7 +235,7 @@ public class AdminController {
     public String viewUserOrders(@PathVariable UUID id, Model model) {
         User user = userService.getUserById(id);
         if (user != null) {
-            List<Order> orders = orderRepository.findByUser(user);
+            List<OrderSummaryDto> orders = orderService.getUserOrderSummaries(user);
             model.addAttribute("user", user);
             model.addAttribute("orders", orders);
             return "pages/admin/userOrders";
